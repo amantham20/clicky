@@ -48,12 +48,13 @@ final class AppleSpeechTranscriptionProvider: BuddyTranscriptionProvider {
         ]
 
         for preferredLocale in preferredLocales {
-            if let speechRecognizer = SFSpeechRecognizer(locale: preferredLocale) {
+            if let speechRecognizer = SFSpeechRecognizer(locale: preferredLocale),
+               speechRecognizer.isAvailable, speechRecognizer.supportsOnDeviceRecognition {
                 return speechRecognizer
             }
         }
 
-        return SFSpeechRecognizer()
+        return nil
     }
 }
 
@@ -87,9 +88,10 @@ private final class AppleSpeechTranscriptionSession: NSObject, BuddyStreamingTra
         recognitionRequest.taskHint = .dictation
         recognitionRequest.addsPunctuation = true
 
-        if speechRecognizer.supportsOnDeviceRecognition {
-            recognitionRequest.requiresOnDeviceRecognition = true
+        guard speechRecognizer.isAvailable, speechRecognizer.supportsOnDeviceRecognition else {
+            throw AppleSpeechTranscriptionProviderError(message: "On-device Apple Speech is unavailable. Install a supported dictation language in System Settings or restore the Parakeet model download.")
         }
+        recognitionRequest.requiresOnDeviceRecognition = true
 
         recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { [weak self] result, error in
             self?.handleRecognitionEvent(result: result, error: error)
@@ -108,6 +110,8 @@ private final class AppleSpeechTranscriptionSession: NSObject, BuddyStreamingTra
     }
 
     func cancel() {
+        hasRequestedFinalTranscript = true
+        hasDeliveredFinalTranscript = true
         recognitionTask?.cancel()
         recognitionTask = nil
     }
@@ -116,6 +120,7 @@ private final class AppleSpeechTranscriptionSession: NSObject, BuddyStreamingTra
         result: SFSpeechRecognitionResult?,
         error: Error?
     ) {
+        guard !hasDeliveredFinalTranscript else { return }
         if let result {
             latestRecognizedText = result.bestTranscription.formattedString
             onTranscriptUpdate(latestRecognizedText)

@@ -6,3 +6,8 @@ build/
 releases/
 .claude/
 coding-plans/
+
+__pycache__/
+.env
+.env.*
+**/xcuserdata/

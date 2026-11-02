@@ -8,7 +8,7 @@
 import AVFoundation
 import Foundation
 
-final class BuddyPCM16AudioConverter {
+nonisolated final class BuddyPCM16AudioConverter {
     private let targetAudioFormat: AVAudioFormat
     private var audioConverter: AVAudioConverter?
     private var currentInputFormatDescription: String?

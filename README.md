@@ -1,3 +1,9 @@
+# Local speech / Claude-only fork
+
+See [LOCAL_SETUP.md](LOCAL_SETUP.md) for this fork’s setup, API authentication, builds and tests. The original upstream instructions below describe the cloud speech version and do not apply to this fork.
+
+---
+
 ## Get HeyClicky for Mac and Windows
 
 The official app is **[HeyClicky](https://www.heyclicky.com/)**, an AI buddy for Mac and Windows, made by me and the team.

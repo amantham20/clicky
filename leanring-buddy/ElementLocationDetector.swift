@@ -20,7 +20,6 @@ import Foundation
 /// Macs are 16:10 → 1280x800. This avoids distorting the image Claude sees, which
 /// significantly improves X-axis coordinate accuracy.
 class ElementLocationDetector {
-    private let apiKey: String
     private let apiURL: URL
     private let model: String
     private let session: URLSession
@@ -35,9 +34,8 @@ class ElementLocationDetector {
         (1366, 768,  1366.0 / 768.0)   // ~16:9  = 1.779 (external monitors, ultrawide fallback)
     ]
 
-    init(apiKey: String, model: String = "claude-sonnet-4-6") {
-        self.apiKey = apiKey
-        self.apiURL = URL(string: "https://api.anthropic.com/v1/messages")!
+    init(model: String = "claude-sonnet-4-6") {
+        self.apiURL = URL(string: AppBundleConfiguration.stringValue(forKey: "ClickyClaudeProxyURL") ?? "http://127.0.0.1:8787/chat")!
         self.model = model
 
         let config = URLSessionConfiguration.default
@@ -155,7 +153,6 @@ class ElementLocationDetector {
         var request = URLRequest(url: apiURL)
         request.httpMethod = "POST"
         request.timeoutInterval = 15
-        request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
         request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         // The beta header activates Computer Use capabilities and the specialized
